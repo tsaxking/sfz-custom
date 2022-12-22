@@ -1,0 +1,17 @@
+{
+    "name": "sfz-custom",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {},
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/tsaxking/sfz-custom.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/tsaxking/sfz-custom/issues"
+    },
+    "homepage": "https://github.com/tsaxking/sfz-custom#readme"
+}
