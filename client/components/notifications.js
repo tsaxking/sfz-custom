@@ -1,24 +1,25 @@
-// VVVVVVVVV Creates notification container VVVVVVVVV
-let notificationEl = document.createElement('div');
-notificationEl.setAttribute('aria-live', 'polite');
-notificationEl.setAttribute('aria-atomic', 'true');
-notificationEl.style.minWidth = 'min-content';
-notificationEl.style.minHeight = 'min-content';
-notificationEl.style.position = 'fixed';
-notificationEl.style.top = '64px';
-notificationEl.style.right = '12px';
-notificationEl.classList.add('text-light');
+const initNotifications = () => {
+    // VVVVVVVVV Creates notification container VVVVVVVVV
+    let notificationEl = document.createElement('div');
+    notificationEl.setAttribute('aria-live', 'polite');
+    notificationEl.setAttribute('aria-atomic', 'true');
+    notificationEl.style.minWidth = 'min-content';
+    notificationEl.style.minHeight = 'min-content';
+    notificationEl.style.position = 'fixed';
+    notificationEl.style.top = '64px';
+    notificationEl.style.right = '12px';
+    notificationEl.classList.add('text-light');
 
-let innerNotificationEl = document.createElement('div');
-innerNotificationEl.style.position = 'absolute';
-innerNotificationEl.style.top = '0';
-innerNotificationEl.style.right = '0';
-innerNotificationEl.id = 'notifications';
+    let innerNotificationEl = document.createElement('div');
+    innerNotificationEl.style.position = 'absolute';
+    innerNotificationEl.style.top = '0';
+    innerNotificationEl.style.right = '0';
+    innerNotificationEl.id = 'notifications';
 
-notificationEl.appendChild(innerNotificationEl);
+    notificationEl.appendChild(innerNotificationEl);
 
-document.querySelector('main').appendChild(notificationEl);
-
+    document.querySelector('main').appendChild(notificationEl);
+}
 
 let numNotifs = 0;
 

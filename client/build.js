@@ -465,27 +465,28 @@ class Canvas {
         this.animating = false;
     }
 }
-// VVVVVVVVV Creates notification container VVVVVVVVV
-let notificationEl = document.createElement('div');
-notificationEl.setAttribute('aria-live', 'polite');
-notificationEl.setAttribute('aria-atomic', 'true');
-notificationEl.style.minWidth = 'min-content';
-notificationEl.style.minHeight = 'min-content';
-notificationEl.style.position = 'fixed';
-notificationEl.style.top = '64px';
-notificationEl.style.right = '12px';
-notificationEl.classList.add('text-light');
+const initNotifications = () => {
+    // VVVVVVVVV Creates notification container VVVVVVVVV
+    let notificationEl = document.createElement('div');
+    notificationEl.setAttribute('aria-live', 'polite');
+    notificationEl.setAttribute('aria-atomic', 'true');
+    notificationEl.style.minWidth = 'min-content';
+    notificationEl.style.minHeight = 'min-content';
+    notificationEl.style.position = 'fixed';
+    notificationEl.style.top = '64px';
+    notificationEl.style.right = '12px';
+    notificationEl.classList.add('text-light');
 
-let innerNotificationEl = document.createElement('div');
-innerNotificationEl.style.position = 'absolute';
-innerNotificationEl.style.top = '0';
-innerNotificationEl.style.right = '0';
-innerNotificationEl.id = 'notifications';
+    let innerNotificationEl = document.createElement('div');
+    innerNotificationEl.style.position = 'absolute';
+    innerNotificationEl.style.top = '0';
+    innerNotificationEl.style.right = '0';
+    innerNotificationEl.id = 'notifications';
 
-notificationEl.appendChild(innerNotificationEl);
+    notificationEl.appendChild(innerNotificationEl);
 
-document.querySelector('main').appendChild(notificationEl);
-
+    document.querySelector('main').appendChild(notificationEl);
+}
 
 let numNotifs = 0;
 
@@ -748,117 +749,120 @@ function openPage(url, pushState = true) {
 }
 window.scrollTo(0, 0);
 
-let pageList,
-    allPages = {},
-    setPathname,
-    titlePrefix = '';
-let previousMainColor;
-document.addEventListener('DOMContentLoaded', async() => {
-    const currentPageSrc = document.querySelector('#current-page-src');
+const initPages = () => {
 
-    let requestUrl;
+    let pageList,
+        allPages = {},
+        setPathname,
+        titlePrefix = '';
+    let previousMainColor;
+    document.addEventListener('DOMContentLoaded', async() => {
+        const currentPageSrc = document.querySelector('#current-page-src');
 
-    switch (currentPageSrc.dataset.link) {
-        case 'home':
-            requestUrl = '/get-links';
-            setPathname = true;
-            break;
-        case 'student-portal':
-            requestUrl = '/class/get-links';
-            setPathname = false;
-            titlePrefix = 'Student Portal -';
-            break;
-    }
+        let requestUrl;
 
-    currentPageSrc.remove();
-
-    pageList = await requestFromServer({
-        url: requestUrl,
-        method: 'POST'
-    });
-
-    pageList = pageList.map(l => {
-        let p;
-        try {
-            // console.log('mainFunction: ', l.name.replace(new RegExp(' ', 'g'), ''));
-            p = new Page(l, mainFunctions[l.name.replace(new RegExp(' ', 'g'), '')]);
-        } catch (e) {
-            return;
+        switch (currentPageSrc.dataset.link) {
+            case 'home':
+                requestUrl = '/get-links';
+                setPathname = true;
+                break;
+            case 'student-portal':
+                requestUrl = '/class/get-links';
+                setPathname = false;
+                titlePrefix = 'Student Portal -';
+                break;
         }
-        allPages[p.pathname.replace(new RegExp('/', 'g'), '-').split('-').join('')] = p;
 
-        return p;
-    }).filter(p => p);
+        currentPageSrc.remove();
 
-    const page = pageList.find(p => p.pathname == location.pathname);
-
-    if (page) page.load();
-    else pageList[0].load();
-
-    try { // if no loading screen, don't do this
-        // loading screen
-        const loadingScreen = document.querySelector('#loading-page');
-        // add animations
-        loadingScreen.classList.add('animate__animated');
-        loadingScreen.classList.add('animate__fadeOut');
-
-        document.querySelectorAll('.animate-on-show').forEach(el => {
-            el.classList.add('animate-hide');
+        pageList = await requestFromServer({
+            url: requestUrl,
+            method: 'POST'
         });
 
-        await sleep(.2);
-        document.querySelectorAll('.animate-on-show').forEach(async(el, i) => {
-            let { animation } = el.dataset;
-
-            if (!animation) animation = 'animate__fadeInUp';
-            el.classList.remove('animate-hide');
-
-            if (isShown(el) && !isHidden(el)) {
-                await sleep(i * .1);
-
-                el.classList.add('animate__animated');
-                el.classList.add(animation);
-
-                el.dataset.shown = true;
-                // el.classList.remove('animate-on-show');
-
-                el.addEventListener('animationend', () => {
-                    el.classList.remove('animate__animated');
-                    el.classList.remove(animation);
-                });
+        pageList = pageList.map(l => {
+            let p;
+            try {
+                // console.log('mainFunction: ', l.name.replace(new RegExp(' ', 'g'), ''));
+                p = new Page(l, mainFunctions[l.name.replace(new RegExp(' ', 'g'), '')]);
+            } catch (e) {
+                return;
             }
-        });
+            allPages[p.pathname.replace(new RegExp('/', 'g'), '-').split('-').join('')] = p;
 
-        // remove loading screen after animation
-        loadingScreen.addEventListener('animationend', () => {
-            loadingScreen.remove();
+            return p;
+        }).filter(p => p);
 
-            window.addEventListener('scroll', () => {
-                currentPage.querySelectorAll('.animate-on-show').forEach(async(el, i) => {
-                    let { animation } = el.dataset;
+        const page = pageList.find(p => p.pathname == location.pathname);
 
-                    if (!animation) animation = 'animate__fadeInUp';
-                    el.classList.remove('animate-hide');
+        if (page) page.load();
+        else pageList[0].load();
 
-                    const animated = el.dataset.shown == 'true';
+        try { // if no loading screen, don't do this
+            // loading screen
+            const loadingScreen = document.querySelector('#loading-page');
+            // add animations
+            loadingScreen.classList.add('animate__animated');
+            loadingScreen.classList.add('animate__fadeOut');
 
-                    if (isShown(el) && !isHidden(el) && !animated) {
-                        await sleep(i * .1);
+            document.querySelectorAll('.animate-on-show').forEach(el => {
+                el.classList.add('animate-hide');
+            });
 
-                        el.classList.add('animate__animated');
-                        el.classList.add(animation);
-                        // el.classList.remove('animate-on-show');
+            await sleep(.2);
+            document.querySelectorAll('.animate-on-show').forEach(async(el, i) => {
+                let { animation } = el.dataset;
 
-                        el.addEventListener('animationend', () => {
-                            el.classList.remove('animate__animated');
-                            el.classList.remove(animation);
-                        });
-                    }
+                if (!animation) animation = 'animate__fadeInUp';
+                el.classList.remove('animate-hide');
+
+                if (isShown(el) && !isHidden(el)) {
+                    await sleep(i * .1);
+
+                    el.classList.add('animate__animated');
+                    el.classList.add(animation);
+
+                    el.dataset.shown = true;
+                    // el.classList.remove('animate-on-show');
+
+                    el.addEventListener('animationend', () => {
+                        el.classList.remove('animate__animated');
+                        el.classList.remove(animation);
+                    });
+                }
+            });
+
+            // remove loading screen after animation
+            loadingScreen.addEventListener('animationend', () => {
+                loadingScreen.remove();
+
+                window.addEventListener('scroll', () => {
+                    currentPage.querySelectorAll('.animate-on-show').forEach(async(el, i) => {
+                        let { animation } = el.dataset;
+
+                        if (!animation) animation = 'animate__fadeInUp';
+                        el.classList.remove('animate-hide');
+
+                        const animated = el.dataset.shown == 'true';
+
+                        if (isShown(el) && !isHidden(el) && !animated) {
+                            await sleep(i * .1);
+
+                            el.classList.add('animate__animated');
+                            el.classList.add(animation);
+                            // el.classList.remove('animate-on-show');
+
+                            el.addEventListener('animationend', () => {
+                                el.classList.remove('animate__animated');
+                                el.classList.remove(animation);
+                            });
+                        }
+                    });
                 });
             });
-        });
-    } catch {}
-});
+        } catch {}
+    });
+}
 /**
  * @description Creates a table from an element, headers, and data. You can add in event listeners if you like! Fully customizable
  * @param {Element} table Table Element
